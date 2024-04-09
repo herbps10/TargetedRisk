@@ -32,6 +32,7 @@ combine_tmle <- function(results, data, trt_levels, cv) {
   )
 }
 
+#' @importFrom stats coef glm plogis qlogis
 estimate_tmle <- function(data, outcome, trt, trt_levels, ybar, trt_prop, g, Qtilde) {
   ybar_fluctuation <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))
   Qtilde_fluctuation  <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))

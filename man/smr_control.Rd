@@ -11,13 +11,13 @@ smr_control(
 )
 }
 \arguments{
-\item{.return_full_fits}{\[\code{logical(1)}]\cr
+\item{.return_full_fits}{\[\code{logical(1)}\]\cr
 Whether to return full SuperLearner fits}
 
-\item{.learners_trt_folds}{\code[\code{integer(1)}]\cr
+\item{.learners_trt_folds}{\[\code{integer(1)}\]\cr
 Number of cross-fitting folds to use in SuperLearner for estimating treatment assignment mechanism}
 
-\item{.learners_outcome_folds}{\code[\code{integer(1)}]\cr
+\item{.learners_outcome_folds}{\[\code{integer(1)}\]\cr
 Number of cross-fitting folds to use in SuperLearner for estimating outcome regression.}
 }
 \description{

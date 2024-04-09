@@ -1,12 +1,13 @@
 Package: TargetedSMR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Targeted Estimation of Standardized Mortality Ratios
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Herbert Susmann <herbert.susmann@nyulangone.org>
+Maintainer: Herbert Susmann <herbert.susmann@nyulangone.org>
+Description: This package provides methods for efficient non-parametric
+    estimation of standardized mortality ratios.
+License: AGPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
+Imports: R6, generics, origami, mlr3superlearner, cli, glue

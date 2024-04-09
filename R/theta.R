@@ -26,6 +26,7 @@ eif_smr <- function(psi1, psi2, eif1, eif2) {
     matrix(psi1 / psi2^2, ncol = ncol(eif2), nrow = nrow(eif2), byrow = TRUE) * eif2
 }
 
+#' @importFrom stats pnorm qnorm sd
 theta_tmle <- function(task, trt_prop, g, fluctuations) {
   psi1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psi2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)

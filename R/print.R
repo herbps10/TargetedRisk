@@ -1,3 +1,4 @@
+#' @importFrom glue glue
 print_smr_table <- function(x, param) {
   f <- function(x, digits = 3) round(x, digits)
   if(param == "SMR") {
@@ -16,15 +17,16 @@ print_smr_table <- function(x, param) {
   }
 }
 
+#' @importFrom cli cli_text
 #' @export
 print.smr <- function(x, ...) {
   estimator <- ifelse(x$estimator == "TMLE", "TMLE", ifelse(x$estimator == "sub", "Substitution", "Probability weighted"))
   cli::cli_text("{.strong SMR Estimator}: {estimator}")
   cat("\n")
-  cli::cli_text("{.strong ψ₁}")
+  cli::cli_text("{.strong Psi1}")
   print_smr_table(x, "psi1")
   cat("\n")
-  cli::cli_text("{.strong ψ₂}")
+  cli::cli_text("{.strong Psi2}")
   print_smr_table(x, "psi2")
   cat("\n")
   cli::cli_text("{.strong SMR}")

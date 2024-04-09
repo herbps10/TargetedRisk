@@ -24,6 +24,7 @@ combine_outcome_regressions <- function(results, data, trt_levels, cv) {
   )
 }
 
+#' @importFrom stats predict
 estimate_outcome_regression <- function(data, baseline, outcome, outcome_type, learners, full_fits, learner_folds) {
   fits <- list()
   predicted_outcomes <- matrix(0, nrow = nrow(data$validation), ncol = 1)
@@ -37,7 +38,7 @@ estimate_outcome_regression <- function(data, baseline, outcome, outcome_type, l
   )
 
   if(full_fits) {
-    fits[[trt_level]] <- fit
+    fits[[1]] <- fit
   }
 
   predicted_outcomes <- predict(fit, data$validation)
