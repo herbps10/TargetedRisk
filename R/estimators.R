@@ -23,6 +23,8 @@
 #'
 #' @export
 smr_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = smr_control()) {
+  if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
+
   task <- tsmr_Task$new(
     data = data,
     trt = trt,
@@ -31,8 +33,6 @@ smr_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", 
     outcome_type = outcome_type,
     folds = folds
   )
-
-  if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   ybar <- mean_outcome(task)
   trt_prop <- treatment_proportion(task)
