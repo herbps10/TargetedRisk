@@ -2,6 +2,10 @@
 
 S3method(print,smr)
 S3method(tidy,smr)
+export(smr_control)
+export(smr_pw)
+export(smr_sub)
+export(smr_tmle)
 export(tidy)
 importFrom(R6,R6Class)
 importFrom(generics,tidy)
