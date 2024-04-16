@@ -1,4 +1,4 @@
-eif_psi1 <- function(w, a, y, trt_prop, g, Qtilde, trt_indicator, theta) {
+eif_psi1 <- function(a, y, trt_prop, Qtilde, trt_indicator, theta) {
   eif <- matrix(nrow = nrow(trt_indicator), ncol = ncol(trt_indicator))
   colnames(eif) <- colnames(trt_indicator)
 
@@ -8,15 +8,19 @@ eif_psi1 <- function(w, a, y, trt_prop, g, Qtilde, trt_indicator, theta) {
   eif
 }
 
-eif_psi2 <- function(w, a, y, trt_prop, g, Qtilde, trt_indicator, theta) {
-  N <- length(w)
+eif_psi2 <- function(a, y, trt_prop, g, riesz, Qtilde, trt_indicator, theta) {
   eif <- matrix(nrow = nrow(trt_indicator), ncol = ncol(trt_indicator))
   colnames(eif) <- colnames(trt_indicator)
 
   for(trt_level in colnames(trt_indicator)) {
-    eif[, trt_level] <- 1 / trt_prop[, trt_level] * (
-      g[, trt_level] * (y - Qtilde[, trt_level]) + (a == trt_level) * (Qtilde[, trt_level] - theta[trt_level])
-    )
+    if(is.null(g)) {
+      eif[, trt_level] <- riesz$rr[, trt_level] * (y - Qtilde[, trt_level]) + (a == trt_level) / trt_prop[, trt_level] * (Qtilde[, trt_level] - theta[trt_level])
+    }
+    else {
+      eif[, trt_level] <- 1 / trt_prop[, trt_level] * (
+        g$treatment_probs[, trt_level] * (y - Qtilde[, trt_level]) + (a == trt_level) * (Qtilde[, trt_level] - theta[trt_level])
+      )
+    }
   }
   eif
 }
@@ -27,13 +31,13 @@ eif_smr <- function(psi1, psi2, eif1, eif2) {
 }
 
 #' @importFrom stats pnorm qnorm sd
-theta_tmle <- function(task, trt_prop, g, fluctuations) {
+theta_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
   psi1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psi2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psiSMR <- psi1 / psi2
 
-  psi1_eif <- eif_psi1(task$data[, task$baseline], task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, fluctuations$ybar, task$trt_indicator, psi1)
-  psi2_eif <- eif_psi2(task$data[, task$baseline], task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, fluctuations$Qtilde, task$trt_indicator, psi2)
+  psi1_eif <- eif_psi1(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, fluctuations$ybar, task$trt_indicator, psi1)
+  psi2_eif <- eif_psi2(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, riesz, fluctuations$Qtilde, task$trt_indicator, psi2)
   psiSMR_eif <- eif_smr(psi1, psi2, psi1_eif, psi2_eif)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 3)

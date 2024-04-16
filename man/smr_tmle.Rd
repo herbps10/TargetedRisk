@@ -9,6 +9,7 @@ smr_tmle(
   trt,
   outcome,
   baseline,
+  trt_method = "default",
   outcome_type = c("binomial", "continuous"),
   folds = 5,
   learners_trt = c("mean", "glm"),

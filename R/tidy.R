@@ -14,3 +14,16 @@ tidy.smr <- function(x, ...) {
   class(out) <- c("tbl_df", "tbl", "data.frame")
   out
 }
+
+#' @export
+tidy.direct <- function(x, ...) {
+  out <- data.frame(estimator = x$estimator,
+                    parameter = "direct",
+                    trt       = rownames(x$estimates),
+                    estimate  = x$estimates[, 1],
+                    std.error = x$se[, 1],
+                    conf.low  = x$low[, 1],
+                    conf.high = x$high[, 1])
+  class(out) <- c("tbl_df", "tbl", "data.frame")
+  out
+}

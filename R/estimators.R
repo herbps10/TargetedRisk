@@ -22,7 +22,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-smr_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = smr_control()) {
+smr_tmle <- function(data, trt, outcome, baseline, trt_method = "default", outcome_type = c("binomial", "continuous"), folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = smr_control()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -36,12 +36,27 @@ smr_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", 
 
   ybar <- mean_outcome(task)
   trt_prop <- treatment_proportion(task)
-  g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
-  Qtilde <- outcome_regression(task, learners_outcome, control$.return_full_fits, control$.learners_outcome_folds)
-  fluctuations <- tmle(task, ybar, trt_prop, g, Qtilde)
+  g <- NULL
+  riesz <- NULL
+  if(trt_method == "default") {
+    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
+  }
+  else {
+    riesz <- riesz_representer(task, learners_trt, "smr", control$.return_full_fits, control$.learners_trt_folds)
+  }
+  Qtilde <- outcome_regression(task, learners_outcome, include_treatment = FALSE, control$.return_full_fits, control$.learners_outcome_folds)
+  #m <- sort(unique(data$A))
+  #g <- as.matrix(data[, paste0("g", m)])
+  #Qtilde <- matrix(data$Qtilde, nrow = nrow(data), ncol = m, byrow = FALSE)
+  #colnames(g) <- m
+  #g <- list(treatment_probs = g)
+  #Qtilde = list(predicted_outcomes = Qtilde)
 
-  theta <- theta_tmle(task, trt_prop, g$treatment_probs, fluctuations)
+  fluctuations <- tmle(task, ybar, trt_prop, Qtilde, g, riesz)
+
+  theta <- theta_tmle(task, trt_prop, fluctuations, g, riesz)
   theta$g <- g
+  theta$riesz <- riesz
 
   theta
 }
