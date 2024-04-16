@@ -14,7 +14,9 @@ eif_psi2 <- function(a, y, trt_prop, g, riesz, Qtilde, trt_indicator, theta) {
 
   for(trt_level in colnames(trt_indicator)) {
     if(is.null(g)) {
-      eif[, trt_level] <- riesz$rr[, trt_level] * (y - Qtilde[, trt_level]) + (a == trt_level) / trt_prop[, trt_level] * (Qtilde[, trt_level] - theta[trt_level])
+      eif[, trt_level] <- 1 / trt_prop[, trt_level] * (
+        riesz$rr[, trt_level] * (y - Qtilde[, trt_level]) + (a == trt_level) * (Qtilde[, trt_level] - theta[trt_level])
+      )
     }
     else {
       eif[, trt_level] <- 1 / trt_prop[, trt_level] * (
