@@ -33,8 +33,6 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
   predicted_outcomes <- matrix(0, nrow = nrow(data$validation), ncol = 1)
 
   if(include_treatment == TRUE) {
-    data$training[[trt]] <- as.factor(data$training[[trt]])
-
     onehot <- model.matrix(~-1 + trt, data = data.frame(trt = factor(data$training[[trt]], levels = trt_levels)))
     train <- cbind(data$training, onehot)
     set <- c(c(baseline, outcome), colnames(onehot))
