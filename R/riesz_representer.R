@@ -65,7 +65,8 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, paramete
       data_shifted          = data_shifted,
       conditional_indicator = matrix(ncol = 1, trt_indicator),
       m = m,
-      library = learners
+      library = learners,
+      folds = learner_folds
     )
 
     if(parameter == "smr") {
