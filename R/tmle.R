@@ -58,7 +58,7 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, ybar, trt_prop, Qtilde
       clever_covariate_valid2 <- g$validation[, trt_level]
     }
 
-    fit2 <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train2 + offset(qlogis(Qtilde$training)), data = data, family = "binomial")
+    fit2 <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train2 + offset(qlogis(Qtilde$training)), family = "binomial")
     Qtilde_fluctuation[, trt_level] <- plogis(qlogis(Qtilde$validation) + coef(fit2) * clever_covariate_valid2)
   }
 
