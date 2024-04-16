@@ -7,7 +7,7 @@ eif_direct <- function(a, y, trt_levels, g, riesz, Qtilde, theta) {
       eif[, trt_level] <- (a == trt_level) * riesz$rr[, trt_level] * (y - Qtilde[, trt_level]) + Qtilde[, trt_level] - theta[trt_level]
     }
     else {
-      eif[, trt_level] <- (a == trt_level) / g$treatment_probs[, trt_level] * (y - Qtilde[, trt_level]) + (Qtilde[, trt_level] - theta[trt_level])
+      eif[, trt_level] <- (a == trt_level) / g$treatment_probs[, trt_level] * (y - Qtilde[, trt_level]) + Qtilde[, trt_level] - theta[trt_level]
     }
   }
   eif

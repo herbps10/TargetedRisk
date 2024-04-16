@@ -34,6 +34,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
 
   if(include_treatment == TRUE) {
     set <- c(baseline, trt, outcome)
+    data$training[[trt]] <- as.factor(data$training[[trt]])
   }
   else {
     set <- c(baseline, outcome)
@@ -56,6 +57,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
     for(trt_level in trt_levels) {
       valid <- data$validation[, set]
       valid[[trt]] <- trt_level
+      valid[[trt]] <- factor(valid[[trt]], levels = trt_levels)
       predicted_outcomes[, trt_level] <- predict(fit, valid)
       predicted_outcomes[, trt_level] <- ifelse(predicted_outcomes[, trt_level] == 0, 0.0001, ifelse(predicted_outcomes[, trt_level] == 0, 0.9999, predicted_outcomes[, trt_level]))
     }
