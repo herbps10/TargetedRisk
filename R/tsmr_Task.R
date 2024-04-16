@@ -13,7 +13,7 @@ tsmr_Task <- R6::R6Class(
     folds = NULL,
     cv = NULL,
     trt_indicator = NULL,
-    initialize = function(data, trt, outcome, baseline, outcome_type, folds) {
+    initialize = function(data, trt, outcome, baseline, outcome_type, folds, use_strata = TRUE) {
       data$tsmr_id <- 1:nrow(data)
 
       self$data <- data
@@ -32,7 +32,7 @@ tsmr_Task <- R6::R6Class(
         self$trt_indicator[, trt_level] <- self$data[[trt]] == trt_level
       }
 
-      self$cv <- cv_setup(self$data, data$tsmr_id, folds)
+      self$cv <- cv_setup(self$data, data$tsmr_id, data[[self$trt]], folds, use_strata)
     },
     get_fold = function(fold_index) {
       list(
