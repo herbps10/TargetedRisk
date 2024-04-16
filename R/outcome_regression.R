@@ -33,15 +33,18 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
   predicted_outcomes <- matrix(0, nrow = nrow(data$validation), ncol = 1)
 
   if(include_treatment == TRUE) {
-    set <- c(baseline, trt, outcome)
     data$training[[trt]] <- as.factor(data$training[[trt]])
+
+    onehot <- model.matrix(~-1 + trt, data = data.frame(trt = factor(data$training[[trt]], levels = trt_levels)))
+    train <- cbind(data$training, onehot)
+    set <- c(c(baseline, outcome), colnames(onehot))
   }
   else {
     set <- c(baseline, outcome)
   }
 
   fit <- superlearner(
-    data = data$training[, set],
+    data = train[, set],
     outcome = outcome,
     outcome_type = outcome_type,
     learners = learners,
@@ -55,9 +58,9 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
   if(include_treatment == TRUE) {
     predicted_outcomes <- matrix(0, ncol = length(trt_levels), nrow = nrow(data$validation))
     for(trt_level in trt_levels) {
-      valid <- data$validation[, set]
-      valid[[trt]] <- trt_level
-      valid[[trt]] <- factor(valid[[trt]], levels = trt_levels)
+      data$validation[[trt]] <- trt_level
+      onehot <- model.matrix(~-1 + trt, data = data.frame(trt = factor(data$validation[[trt]], levels = trt_levels)))
+      valid <- cbind(data$validation, onehot)
       predicted_outcomes[, trt_level] <- predict(fit, valid)
       predicted_outcomes[, trt_level] <- ifelse(predicted_outcomes[, trt_level] == 0, 0.0001, ifelse(predicted_outcomes[, trt_level] == 0, 0.9999, predicted_outcomes[, trt_level]))
     }
