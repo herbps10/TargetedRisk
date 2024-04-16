@@ -38,6 +38,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
     set <- c(c(baseline, outcome), colnames(onehot))
   }
   else {
+    train <- data$training
     set <- c(baseline, outcome)
   }
 
