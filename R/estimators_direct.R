@@ -22,7 +22,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_tmle <- function(data, trt, outcome, baseline, trt_method = "default", outcome_type = c("binomial", "continuous"), folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = smr_control()) {
+direct_tmle <- function(data, trt, outcome, baseline, trt_method = "default", outcome_type = c("binomial", "continuous"), folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = smr_control(), riesz_method = "superriesz", torch_params = list()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -40,7 +40,7 @@ direct_tmle <- function(data, trt, outcome, baseline, trt_method = "default", ou
     g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
   }
   else {
-    riesz <- riesz_representer(task, learners_trt, "direct", control$.return_full_fits, control$.learners_trt_folds)
+    riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = riesz_method, torch_params = torch_params)
   }
   Qtilde <- outcome_regression(task, learners_outcome, include_treatment = TRUE, control$.return_full_fits, control$.learners_outcome_folds)
 
@@ -128,7 +128,7 @@ direct_pw <- function(data, trt, outcome, baseline, trt_method = "default", outc
     g <- treatment_probability(task, learners, control$.return_full_fits, control$.learners_trt_folds)
   }
   else {
-    riesz <- riesz_representer(task, learners, "direct", control$.return_full_fits, control$.learners_trt_folds)
+    riesz <- riesz_representer(task, learners, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct")
   }
 
   theta_direct_pw(task, g, riesz)
