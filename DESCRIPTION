@@ -11,3 +11,6 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
 Imports: R6, generics, origami, mlr3superlearner, cli, glue, SuperRiesz
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

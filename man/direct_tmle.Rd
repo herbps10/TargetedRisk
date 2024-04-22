@@ -2,19 +2,20 @@
 % Please edit documentation in R/estimators_direct.R
 \name{direct_tmle}
 \alias{direct_tmle}
-\title{Targeted Minimum Loss-Based Estimator of directly standardized mean outcomes}
+\title{Targeted Minimum Loss-Based Estimator for Direct Standardization}
 \usage{
 direct_tmle(
   data,
   trt,
   outcome,
   baseline,
-  trt_method = "default",
   outcome_type = c("binomial", "continuous"),
+  trt_method = "default",
   folds = 5,
   learners_trt = c("mean", "glm"),
   learners_outcome = c("mean", "glm"),
-  control = smr_control()
+  control = standardization_control(),
+  torch_params = list()
 )
 }
 \arguments{
@@ -42,12 +43,12 @@ Vector of learners to include in SuperLearner library for estimating treatment a
 \item{learners_outcome}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating outcome regression.}
 
-\item{control}{\[\code{smr_control}\]\cr
-Additional tuning parameters for controlling fitting. Specify using \link{smr_control}.}
+\item{control}{\[\code{standardization_control}\]\cr
+Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.}
 }
 \value{
 A list of class \code{smr}
 }
 \description{
-Targeted Minimum Loss-Based Estimator of directly standardized mean outcomes
+Targeted Minimum Loss-Based Estimator for Direct Standardization
 }

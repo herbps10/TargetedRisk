@@ -1,10 +1,13 @@
 estimate_riesz_representer_torch <- function(data, baseline, trt, trt_levels, parameter, params) {
+  d_out <- 1
   d_in <- length(baseline) + length(trt_levels)
-  d_out <- params$d_out
   hidden <- params$hidden
   learning_rate <- params$learning_rate
   epochs <- params$epochs
   dropout <- params$dropout
+  torch_seed <- params$seed
+
+  if(!is.na(torch_seed)) torch::torch_manual_seed(torch_seed)
 
   data_natural <- torch::torch_tensor(cbind(
     as.matrix(data$training[, c(baseline)]),

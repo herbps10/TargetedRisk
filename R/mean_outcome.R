@@ -1,3 +1,6 @@
+#'
+#'
+#'
 mean_outcome <- function(task) {
   result <- matrix(0, nrow = nrow(task$data), ncol = 1)
 

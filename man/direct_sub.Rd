@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimators_direct.R
 \name{direct_sub}
 \alias{direct_sub}
-\title{Substitution Estimator of the directly standardized mean outcome}
+\title{Substitution Estimator for Direct Standardization}
 \usage{
 direct_sub(
   data,
@@ -12,7 +12,7 @@ direct_sub(
   outcome_type = "binomial",
   folds = 5,
   learners = c("mean", "glm"),
-  control = smr_control()
+  control = standardization_control()
 )
 }
 \arguments{
@@ -37,12 +37,12 @@ Number of folds for top level cross-fitting.}
 \item{learners}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating outcome regression.}
 
-\item{control}{\[\code{smr_control}\]\cr
-Additional tuning parameters for controlling fitting. Specify using \link{smr_control}.}
+\item{control}{\[\code{standardization_control}\]\cr
+Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.}
 }
 \value{
 A list of class \code{smr}
 }
 \description{
-Substitution Estimator of the directly standardized mean outcome
+Substitution Estimator for Direct Standardization
 }

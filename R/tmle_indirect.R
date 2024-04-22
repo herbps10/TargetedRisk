@@ -1,4 +1,4 @@
-tmle <- function(task, ybar, trt_prop, Qtilde, g = NULL, riesz = NULL) {
+tmle_indirect <- function(task, ybar, trt_prop, Qtilde, g = NULL, riesz = NULL) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
     results[[fold_index]] <- estimate_tmle(
@@ -13,10 +13,10 @@ tmle <- function(task, ybar, trt_prop, Qtilde, g = NULL, riesz = NULL) {
       if(is.null(riesz)) { NULL } else { extract_fold(riesz$rr, task$cv, fold_index) }
     )
   }
-  combine_tmle(results, task$data, task$trt_levels, task$cv)
+  combine_tmle_indirect(results, task$data, task$trt_levels, task$cv)
 }
 
-combine_tmle <- function(results, data, trt_levels, cv) {
+combine_tmle_indirect <- function(results, data, trt_levels, cv) {
   ybar_fluctuation   <- matrix(0, nrow = nrow(data), ncol = length(trt_levels))
   Qtilde_fluctuation <- matrix(0, nrow = nrow(data), ncol = length(trt_levels))
 
