@@ -43,8 +43,8 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, ybar, trt_prop, Qtilde
 
   for(trt_level in trt_levels) {
     # Psi 1
-    clever_covariate_train1 <- as.numeric(data$training[[trt]] == trt_level) / trt_prop$training[trt_level]
-    clever_covariate_valid1 <- as.numeric(data$validation[[trt]] == trt_level) / trt_prop$validation[trt_level]
+    clever_covariate_train1 <- as.numeric(data$training[[trt]] == trt_level) / trt_prop$training[, trt_level]
+    clever_covariate_valid1 <- as.numeric(data$validation[[trt]] == trt_level) / trt_prop$validation[, trt_level]
     fit1 <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train1 + offset(qlogis(ybar$training[, 1])), family = "binomial")
     ybar_fluctuation[, trt_level] <- plogis(qlogis(ybar$validation) + coef(fit1) * clever_covariate_valid1)
 

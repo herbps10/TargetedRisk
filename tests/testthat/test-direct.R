@@ -21,7 +21,7 @@ test_that("direct probability weighting method works", {
 
 test_that("direct probability weighting method with SuperRiesz works", {
   set.seed(1)
-  result <- direct_pw(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners = list(list("torch", epochs = 25)), control = standardization_control(.learners_trt_folds = 1))
+  result <- direct_pw(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners = list(list("nn", epochs = 25)), control = standardization_control(.learners_trt_folds = 1))
 
   expect_equal(unname(result$estimates[,"direct"]), c(0.037, 0.044, 0.171, 0.186, 0.045), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
@@ -54,7 +54,7 @@ test_that("direct TMLE method works", {
 
 test_that("direct TMLE method with SuperRiesz works", {
   set.seed(1)
-  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners_trt = list(list("torch", epochs = 25)), learners_outcome = c("mean"), control = standardization_control(.learners_trt_folds = 1))
+  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners_trt = list(list("nn", epochs = 25)), learners_outcome = c("mean"), control = standardization_control(.learners_trt_folds = 1))
 
   expect_equal(unname(result$estimates[,"direct"]), c(0.641, 0.656, 0.62, 0.637, 0.656), tolerance = 1e-2)
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))

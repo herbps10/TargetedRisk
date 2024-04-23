@@ -19,6 +19,9 @@ outcome_regression <- function(task, learners, include_treatment, full_fits, lea
 
 combine_outcome_regressions <- function(results, data, trt_levels, include_treatment, cv) {
   predicted_outcomes <- matrix(0, nrow = nrow(data), ncol = ifelse(include_treatment, length(trt_levels), 1))
+  if(include_treatment == TRUE) {
+    colnames(predicted_outcomes) <- trt_levels
+  }
   for(fold_index in seq_along(cv)) {
     predicted_outcomes[cv[[fold_index]]$validation_set, ] <- results[[fold_index]]$predicted_outcomes
   }
@@ -56,6 +59,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
 
   if(include_treatment == TRUE) {
     predicted_outcomes <- matrix(0, ncol = length(trt_levels), nrow = nrow(data$validation))
+    colnames(predicted_outcomes) <- trt_levels
     for(trt_level in trt_levels) {
       data$validation[[trt]] <- trt_level
       onehot <- model.matrix(~-1 + trt, data = data.frame(trt = factor(data$validation[[trt]], levels = trt_levels)))

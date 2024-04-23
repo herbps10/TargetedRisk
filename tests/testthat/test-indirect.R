@@ -22,9 +22,9 @@ test_that("indirect probability weighting method works", {
 
 test_that("indirect probability weighting method with SuperRiesz works", {
   set.seed(1)
-  result <- indirect_pw(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners = list(list("torch", epochs = 25)), control = standardization_control(.learners_trt_folds = 1))
+  result <- indirect_pw(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners = list(list("nn", epochs = 25)), control = standardization_control(.learners_trt_folds = 1))
 
-  expect_equal(unname(result$estimates[,"SMR"]), c(0.103, 0.12, 0.466, 0.51, 0.123), tolerance = 1e-1)
+  expect_equal(unname(result$estimates[,"SMR"]), c(0.116, 0.135, 0.524, 0.573, 0.139), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))
 })
 
@@ -55,7 +55,7 @@ test_that("indirect TMLE method works", {
 
 test_that("indirect TMLE method with SuperRiesz works", {
   set.seed(1)
-  result <- indirect_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners_trt = list(list("torch", epochs = 25)), learners_outcome = c("mean"), control = standardization_control(.learners_trt_folds = 1))
+  result <- indirect_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "SuperRiesz", learners_trt = list(list("nn", epochs = 25)), learners_outcome = c("mean"), control = standardization_control(.learners_trt_folds = 1))
 
   expect_equal(unname(result$estimates[,"SMR"]), c(0.939, 1.269, 0.947, 0.976, 1.146), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))

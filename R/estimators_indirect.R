@@ -58,6 +58,7 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
   theta <- theta_indirect_tmle(task, trt_prop, fluctuations, g, riesz)
   theta$g <- g
   theta$riesz <- riesz
+  theta$Qtilde <- Qtilde
 
   theta
 }

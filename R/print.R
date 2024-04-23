@@ -7,8 +7,9 @@ print_smr_table <- function(x, param) {
   else {
     cat("Trt \t Est \t SE \t 95% CI\n")
   }
+  r <- rownames(x$estimates)
   for(trt in seq_along(rownames(x$estimates))) {
-    text <- glue::glue("{trt} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
+    text <- glue::glue("{r[trt]} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
     if(param == "SMR") {
       text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 3)}"))
     }
@@ -43,8 +44,9 @@ print_direct_table <- function(x, param) {
   else {
     cat("Trt \t Est \t SE \t 95% CI\n")
   }
+  r <- rownames(x$estimates)
   for(trt in seq_along(rownames(x$estimates))) {
-    text <- glue::glue("{trt} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
+    text <- glue::glue("{r[trt]} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
     if(param == "SMR") {
       text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 3)}"))
     }

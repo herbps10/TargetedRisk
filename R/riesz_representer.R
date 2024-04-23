@@ -43,7 +43,7 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, 
       trt_indicator <- as.numeric(data$training[[trt]] == trt_level)
 
       if(parameter == "smr") {
-        m   <- \(natural, shifted, conditional_indicator, conditional_mean) natural * conditional_indicator
+        m   <- \(alpha, data) alpha(data()) * data("weight")[, 1]
         set <- baseline
         data_natural       <- data$training[, set]
         data_shifted       <- data$training[, set]
@@ -51,7 +51,7 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, 
         data_shifted_valid <- data$validation[, set]
       }
       else {
-        m   <- \(natural, shifted, conditional_indicator, conditional_mean) shifted
+        m   <- \(alpha, data) alpha(data("shifted"))
         set <- c(trt, baseline)
 
         data_natural              <- data$training[, set]
@@ -68,11 +68,10 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, 
       }
 
       fit <- super_riesz(
-        data                  = data_natural,
-        data_shifted          = data_shifted,
-        conditional_indicator = matrix(ncol = 1, trt_indicator),
-        m = m,
+        data = data_natural,
         library = learners,
+        alternatives = list(shifted = data_shifted, weight = data.frame(weight = trt_indicator)),
+        m = m,
         folds = learner_folds
       )
 

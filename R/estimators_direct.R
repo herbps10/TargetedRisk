@@ -53,6 +53,7 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial
   theta <- theta_direct_tmle(task, fluctuations, g, riesz)
   theta$g <- g
   theta$riesz <- riesz
+  theta$Qtilde <- Qtilde
 
   theta
 }
