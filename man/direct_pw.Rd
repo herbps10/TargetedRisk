@@ -2,18 +2,18 @@
 % Please edit documentation in R/estimators_direct.R
 \name{direct_pw}
 \alias{direct_pw}
-\title{Probability Weighted Estimator of the directly standardized mean outcome}
+\title{Probability Weighted Estimator for Direct Standardization}
 \usage{
 direct_pw(
   data,
   trt,
   outcome,
   baseline,
-  trt_method = "default",
   outcome_type = "binomial",
+  trt_method = "default",
   folds = 5,
   learners = c("mean", "glm"),
-  control = smr_control()
+  control = standardization_control()
 )
 }
 \arguments{
@@ -38,12 +38,12 @@ Number of folds for top level cross-fitting.}
 \item{learners}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.}
 
-\item{control}{\[\code{smr_control}\]\cr
-Additional tuning parameters for controlling fitting. Specify using \link{smr_control}.}
+\item{control}{\[\code{standardization_control}\]\cr
+Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.}
 }
 \value{
 A list of class \code{smr}
 }
 \description{
-Probability Weighted Estimator of the directly standardized mean outcome
+Probability Weighted Estimator for Direct Standardization
 }

@@ -7,8 +7,9 @@ print_smr_table <- function(x, param) {
   else {
     cat("Trt \t Est \t SE \t 95% CI\n")
   }
+  r <- rownames(x$estimates)
   for(trt in seq_along(rownames(x$estimates))) {
-    text <- glue::glue("{trt} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
+    text <- glue::glue("{r[trt]} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
     if(param == "ER") {
       text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 3)}"))
     }
@@ -26,11 +27,11 @@ print.smr <- function(x, ...) {
   estimator <- ifelse(x$estimator == "TMLE", "TMLE", ifelse(x$estimator == "sub", "Substitution", "Probability weighted"))
   cli::cli_text("{.strong Indirect Standardization Estimator}: {estimator}")
   cat("\n")
-  cli::cli_text("{.strong Psi1}")
-  print_smr_table(x, "psi1")
+  cli::cli_text("{.strong Theta1}")
+  print_smr_table(x, "theta1")
   cat("\n")
-  cli::cli_text("{.strong Psi2}")
-  print_smr_table(x, "psi2")
+  cli::cli_text("{.strong Theta2}")
+  print_smr_table(x, "theta2")
   cat("\n")
   cli::cli_text("{.strong Standardized Excess Risk (ER)}")
   print_smr_table(x, "ER")
@@ -49,8 +50,9 @@ print_direct_table <- function(x, param) {
   else {
     cat("Trt \t Est \t SE \t 95% CI\n")
   }
+  r <- rownames(x$estimates)
   for(trt in seq_along(rownames(x$estimates))) {
-    text <- glue::glue("{trt} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
+    text <- glue::glue("{r[trt]} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
     if(param == "SMR") {
       text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 3)}"))
     }
@@ -65,7 +67,7 @@ print.direct <- function(x, ...) {
   estimator <- ifelse(x$estimator == "TMLE", "TMLE", ifelse(x$estimator == "sub", "Substitution", "Probability weighted"))
   cli::cli_text("{.strong Direct Standardization Estimator}: {estimator}")
   cat("\n")
-  cli::cli_text("{.strong Psi}")
+  cli::cli_text("{.strong Theta}")
   print_direct_table(x, "direct")
   cat("\n")
 }

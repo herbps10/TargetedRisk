@@ -15,18 +15,18 @@ eif_direct <- function(a, y, trt_levels, g, riesz, Qtilde, theta) {
 
 #' @importFrom stats pnorm qnorm sd
 theta_direct_tmle <- function(task, fluctuations, g, riesz) {
-  psi <- colMeans(fluctuations$Qtilde)
+  theta <- colMeans(fluctuations$Qtilde)
 
-  psi_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, riesz, fluctuations$Qtilde, psi)
+  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, riesz, fluctuations$Qtilde, theta)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
   colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("direct")
   colnames(p_values) <- "direct"
-  estimates[, 1] <- psi
+  estimates[, 1] <- theta
 
-  se[, 1] <- apply(psi_eif, 2, sd) / sqrt(task$n)
+  se[, 1] <- apply(theta_eif, 2, sd) / sqrt(task$n)
 
   alpha <- 0.95
   low  <- estimates + qnorm((1 - alpha) / 2) * se
@@ -48,14 +48,14 @@ theta_direct_tmle <- function(task, fluctuations, g, riesz) {
 }
 
 theta_direct_sub <- function(task, Qtilde) {
-  psi <- colMeans(Qtilde)
+  theta <- colMeans(Qtilde)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
   colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("direct")
 
-  estimates[, 1] <- psi
+  estimates[, 1] <- theta
 
   result <- list(
     estimator = "sub",
@@ -72,10 +72,10 @@ theta_direct_sub <- function(task, Qtilde) {
 
 theta_direct_pw <- function(task, g, riesz) {
   if(is.null(g)) {
-    psi <- colMeans(task$data[[task$outcome]] * task$trt_indicator * riesz$rr)
+    theta <- colMeans(task$data[[task$outcome]] * task$trt_indicator * riesz$rr)
   }
   else {
-    psi <- colMeans(task$data[[task$outcome]] * task$trt_indicator / g$treatment_probs)
+    theta <- colMeans(task$data[[task$outcome]] * task$trt_indicator / g$treatment_probs)
   }
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
@@ -83,7 +83,7 @@ theta_direct_pw <- function(task, g, riesz) {
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
   colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("direct")
 
-  estimates[, 1] <- psi
+  estimates[, 1] <- theta
 
   result <- list(
     estimator = "pw",

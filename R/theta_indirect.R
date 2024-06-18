@@ -1,4 +1,4 @@
-eif_psi1 <- function(a, y, trt_prop, Qtilde, trt_indicator, theta) {
+eif_theta1 <- function(a, y, trt_prop, Qtilde, trt_indicator, theta) {
   eif <- matrix(nrow = nrow(trt_indicator), ncol = ncol(trt_indicator))
   colnames(eif) <- colnames(trt_indicator)
 
@@ -8,7 +8,7 @@ eif_psi1 <- function(a, y, trt_prop, Qtilde, trt_indicator, theta) {
   eif
 }
 
-eif_psi2 <- function(a, y, trt_prop, g, riesz, Qtilde, trt_indicator, theta) {
+eif_theta2 <- function(a, y, trt_prop, g, riesz, Qtilde, trt_indicator, theta) {
   eif <- matrix(nrow = nrow(trt_indicator), ncol = ncol(trt_indicator))
   colnames(eif) <- colnames(trt_indicator)
 
@@ -36,17 +36,16 @@ eif_smr <- function(psi1, psi2, eif1, eif2) {
     matrix(psi1 / psi2^2, ncol = ncol(eif2), nrow = nrow(eif2), byrow = TRUE) * eif2
 }
 
-#' @importFrom stats pnorm qnorm sd
-theta_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
-  psi1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  psi2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  psiER <- psi1 - psi2
-  psiSMR <- psi1 / psi2
 
-  psi1_eif <- eif_psi1(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, fluctuations$ybar, task$trt_indicator, psi1)
-  psi2_eif <- eif_psi2(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, riesz, fluctuations$Qtilde, task$trt_indicator, psi2)
-  psiER_eif  <- eif_er(psi1, psi2, psi1_eif, psi2_eif)
-  psiSMR_eif <- eif_smr(psi1, psi2, psi1_eif, psi2_eif)
+#' @importFrom stats pnorm qnorm sd
+theta_indirect_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
+  theta1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  theta2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  thetaSMR <- theta1 / theta2
+
+  theta1_eif <- eif_theta1(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, fluctuations$ybar, task$trt_indicator, theta1)
+  theta2_eif <- eif_theta2(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, riesz, fluctuations$Qtilde, task$trt_indicator, theta2)
+  thetaSMR_eif <- eif_smr(theta1, theta2, theta1_eif, theta2_eif)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 4)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
@@ -83,11 +82,10 @@ theta_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
   result
 }
 
-theta_sub <- function(task, ybar, trt_prop, Qtilde) {
-  psi1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  psi2 <- colSums(matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  psiSMR <- psi1 / psi2
-  psiER <- psi1 - psi2
+theta_indirect_sub <- function(task, ybar, trt_prop, Qtilde) {
+  theta1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  theta2 <- colSums(matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  thetaSMR <- theta1 / theta2
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 4)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
@@ -112,11 +110,15 @@ theta_sub <- function(task, ybar, trt_prop, Qtilde) {
   result
 }
 
-theta_pw <- function(task, ybar, trt_prop, g) {
-  psi1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  psi2 <- colSums(matrix(task$data[[task$outcome]], nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * g) / colSums(task$trt_indicator)
-  psiER <- psi1 - psi2
-  psiSMR <- psi1 / psi2
+theta_indirect_pw <- function(task, ybar, trt_prop, g, riesz) {
+  theta1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  if(is.null(g)) {
+    theta2 <- colSums(matrix(task$data[[task$outcome]], nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * riesz$rr) / colSums(task$trt_indicator)
+  }
+  else {
+    theta2 <- colSums(matrix(task$data[[task$outcome]], nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * g$treatment_probs) / colSums(task$trt_indicator)
+  }
+  thetaSMR <- theta1 / theta2
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 3)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
@@ -127,7 +129,7 @@ theta_pw <- function(task, ybar, trt_prop, g) {
   estimates[, 2] <- psi2
   estimates[, 3] <- psiER
   estimates[, 4] <- psiSMR
-
+  
   result <- list(
     estimator = "pw",
     estimates = estimates,
