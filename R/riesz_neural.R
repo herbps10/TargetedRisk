@@ -2,6 +2,7 @@ estimate_riesz_representer_torch <- function(data, baseline, trt, trt_levels, pa
   d_in <- length(baseline) + length(trt_levels)
   d_out <- params$d_out
   hidden <- params$hidden
+  hidden2 <- params$hidden2
   learning_rate <- params$learning_rate
   epochs <- params$epochs
   dropout <- params$dropout
@@ -32,12 +33,12 @@ estimate_riesz_representer_torch <- function(data, baseline, trt, trt_levels, pa
 
   heads <- lapply(trt_levels, \(trt_level) {
     torch::nn_sequential(
-      torch::nn_linear(ifelse(parameter == "smr", hidden, hidden + 1), hidden),
+      torch::nn_linear(ifelse(parameter == "smr", hidden, hidden + 1), hidden2),
       torch::nn_elu(),
-      torch::nn_linear(hidden, hidden),
+      torch::nn_linear(hidden2, hidden2),
       torch::nn_elu(),
       torch::nn_dropout(dropout),
-      torch::nn_linear(hidden, d_out),
+      torch::nn_linear(hidden2, d_out),
       torch::nn_softplus()
     )
   })

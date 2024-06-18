@@ -27,6 +27,10 @@ eif_psi2 <- function(a, y, trt_prop, g, riesz, Qtilde, trt_indicator, theta) {
   eif
 }
 
+eif_er <- function(psi1, psi2, eif1, eif2) {
+  eif1 - eif2
+}
+
 eif_smr <- function(psi1, psi2, eif1, eif2) {
   matrix(1 / psi2, ncol = ncol(eif1), nrow = nrow(eif1), byrow = TRUE) * eif1 -
     matrix(psi1 / psi2^2, ncol = ncol(eif2), nrow = nrow(eif2), byrow = TRUE) * eif2
@@ -36,30 +40,35 @@ eif_smr <- function(psi1, psi2, eif1, eif2) {
 theta_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
   psi1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psi2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  psiER <- psi1 - psi2
   psiSMR <- psi1 / psi2
 
   psi1_eif <- eif_psi1(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, fluctuations$ybar, task$trt_indicator, psi1)
   psi2_eif <- eif_psi2(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, riesz, fluctuations$Qtilde, task$trt_indicator, psi2)
+  psiER_eif  <- eif_er(psi1, psi2, psi1_eif, psi2_eif)
   psiSMR_eif <- eif_smr(psi1, psi2, psi1_eif, psi2_eif)
 
-  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 3)
-  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
+  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 4)
+  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
-  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "SMR")
-  colnames(p_values) <- "SMR"
+  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "ER", "SMR")
+  colnames(p_values) <- c("ER", "SMR")
   estimates[, 1] <- psi1
   estimates[, 2] <- psi2
-  estimates[, 3] <- psiSMR
+  estimates[, 3] <- psiER
+  estimates[, 4] <- psiSMR
 
-  se[, 1] <- apply(psi1_eif, 2, sd)   / sqrt(task$n)
-  se[, 2] <- apply(psi2_eif, 2, sd)   / sqrt(task$n)
-  se[, 3] <- apply(psiSMR_eif, 2, sd) / sqrt(task$n)
+  se[, 1] <- apply(psi1_eif, 2, sd) / sqrt(task$n)
+  se[, 2] <- apply(psi2_eif, 2, sd) / sqrt(task$n)
+  se[, 3] <- apply(psiER_eif, 2, sd) / sqrt(task$n)
+  se[, 4] <- apply(psiSMR_eif, 2, sd) / sqrt(task$n)
 
   alpha <- 0.95
   low  <- estimates + qnorm((1 - alpha) / 2) * se
   high <- estimates + qnorm(1 - (1 - alpha) / 2) * se
 
-  p_values <- 2 * pnorm(abs((estimates[, 3] - 1) / se[, 3]), lower.tail = FALSE)
+  p_values[, 1] <- 2 * pnorm(abs((estimates[, 3] - 1) / se[, 3]), lower.tail = FALSE)
+  p_values[, 2] <- 2 * pnorm(abs((estimates[, 4] - 1) / se[, 4]), lower.tail = FALSE)
 
   result <- list(
     estimator = "TMLE",
@@ -78,15 +87,17 @@ theta_sub <- function(task, ybar, trt_prop, Qtilde) {
   psi1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psi2 <- colSums(matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psiSMR <- psi1 / psi2
+  psiER <- psi1 - psi2
 
-  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 3)
-  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
+  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 4)
+  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
-  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "SMR")
+  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "ER", "SMR")
 
   estimates[, 1] <- psi1
   estimates[, 2] <- psi2
-  estimates[, 3] <- psiSMR
+  estimates[, 3] <- psiER
+  estimates[, 4] <- psiSMR
 
   result <- list(
     estimator = "sub",
@@ -104,16 +115,18 @@ theta_sub <- function(task, ybar, trt_prop, Qtilde) {
 theta_pw <- function(task, ybar, trt_prop, g) {
   psi1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   psi2 <- colSums(matrix(task$data[[task$outcome]], nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * g) / colSums(task$trt_indicator)
+  psiER <- psi1 - psi2
   psiSMR <- psi1 / psi2
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 3)
-  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
+  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
   rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
-  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "SMR")
+  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("psi1", "psi2", "ER", "SMR")
 
   estimates[, 1] <- psi1
   estimates[, 2] <- psi2
-  estimates[, 3] <- psiSMR
+  estimates[, 3] <- psiER
+  estimates[, 4] <- psiSMR
 
   result <- list(
     estimator = "pw",
