@@ -36,11 +36,11 @@ estimate_tmle_direct <- function(data, outcome, trt, trt_levels, Qtilde, g = NUL
   for(trt_level in trt_levels) {
     if(is.null(g)) {
       clever_covariate_train <- (data$training[[trt]] == trt_level) * riesz$training[, trt_level]
-      clever_covariate_valid <- (data$validation[[trt]] == trt_level) * riesz$validation[, trt_level]
+      clever_covariate_valid <- 1 * riesz$validation[, trt_level]
     }
     else {
       clever_covariate_train <- (data$training[[trt]] == trt_level) / g$training[, trt_level]
-      clever_covariate_valid <- (data$validation[[trt]] == trt_level) / g$validation[, trt_level]
+      clever_covariate_valid <- 1 / g$validation[, trt_level]
     }
 
     fit <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train + offset(qlogis(Qtilde$training[, trt_level])), family = "binomial")
