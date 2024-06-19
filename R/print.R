@@ -11,10 +11,10 @@ print_smr_table <- function(x, param) {
   for(trt in seq_along(rownames(x$estimates))) {
     text <- glue::glue("{r[trt]} \t {f(x$estimates[trt, param])} \t {f(x$se[trt, param])} \t ({f(x$low[trt, param])}, {f(x$high[trt, param])})")
     if(param == "ER") {
-      text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 3)}"))
+      text <- paste0(text, glue::glue("\t {f(x$p_values[trt, 1], 3)}"))
     }
     else if(param == "SMR") {
-      text <- paste0(text, glue::glue("\t {f(x$p_values[trt], 4)}"))
+      text <- paste0(text, glue::glue("\t {f(x$p_values[trt, 2], 3)}"))
     }
     text <- paste0(text, "\n")
     cat(text)
