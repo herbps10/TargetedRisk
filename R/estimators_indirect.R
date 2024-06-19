@@ -18,13 +18,15 @@
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param verbose \[\code{logical}]\cr
+#' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
 #' Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.
 #'
 #' @return A list of class \code{smr}
 #'
 #' @export
-indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), folds = 5, trt_method = "default", learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = standardization_control()) {
+indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), folds = 5, trt_method = "default", learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), verbose = FALSE, control = standardization_control()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -41,8 +43,9 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
 
   g <- NULL
   riesz <- NULL
+  if(verbose == TRUE) cat("Starting treatment fitting\n")
   if(trt_method == "default") {
-    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
+    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
   }
   else if(tolower(trt_method) == "superriesz") {
     riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "smr", method = "superriesz")
@@ -51,6 +54,7 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
     riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "smr", method = "torch", torch_params = control$.torch_params)
   }
 
+  if(verbose == TRUE) cat("Starting outcome fitting\n")
   Qtilde <- outcome_regression(task, learners_outcome, include_treatment = FALSE, control$.return_full_fits, control$.learners_outcome_folds)
 
   fluctuations <- tmle_indirect(task, ybar, trt_prop, Qtilde, g, riesz)
