@@ -22,7 +22,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), control = standardization_control(), torch_params = list()) {
+direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, control = standardization_control(), torch_params = list()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -34,19 +34,29 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial
     folds = folds
   )
 
-  g <- NULL
   riesz <- NULL
-  if(trt_method == "default") {
-    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
+  if(is.null(g)) {
+    if(trt_method == "default") {
+      g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
+    }
+    else if(tolower(trt_method) == "superriesz") {
+      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz")
+    }
+    else if(tolower(trt_method) == "torch") {
+      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params)
+    }
   }
-  else if(tolower(trt_method) == "superriesz") {
-    riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz")
-  }
-  else if(tolower(trt_method) == "torch") {
-    riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params)
+  else {
+    g <- list(treatment_probs = g)
   }
 
-  Qtilde <- outcome_regression(task, learners_outcome, include_treatment = TRUE, control$.return_full_fits, control$.learners_outcome_folds)
+
+  if(is.null(Qtilde)) {
+    Qtilde <- outcome_regression(task, learners_outcome, include_treatment = TRUE, control$.return_full_fits, control$.learners_outcome_folds)
+  }
+  else {
+    Qtilde <- list(predicted_outcomes = Qtilde)
+  }
 
   fluctuations <- tmle_direct(task, Qtilde, g, riesz)
 
