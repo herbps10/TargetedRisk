@@ -18,6 +18,8 @@
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param verbose \[\code{logical}]\cr
+#' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
 #' Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.
 #'
@@ -40,6 +42,7 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
   trt_prop <- treatment_proportion(task)
 
   riesz <- NULL
+  if(verbose == TRUE) cat("Starting treatment fitting\n")
   if(is.null(g)) {
     if(trt_method == "default") {
       g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
@@ -55,6 +58,7 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
     g <- list(treatment_probs = g)
   }
 
+  if(verbose == TRUE) cat("Starting outcome fitting\n")
   if(is.null(Qtilde)) {
     Qtilde <- outcome_regression(task, learners_outcome, include_treatment = FALSE, control$.return_full_fits, control$.learners_outcome_folds)
   }
