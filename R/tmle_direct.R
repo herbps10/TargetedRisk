@@ -50,7 +50,8 @@ estimate_tmle_direct <- function(data, outcome, trt, trt_levels, outcome_type, Q
     }
     else {
       fit <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train + offset(Qtilde$training[, trt_level]))
-      Qtilde_fluctuation[, trt_level] <- Qtilde$validation[, trt_level] + coef(fit) * clever_covariate_valid
+      eps <- coef(fit)
+      Qtilde_fluctuation[, trt_level] <- Qtilde$validation[, trt_level] + eps * clever_covariate_valid
     }
   }
 
