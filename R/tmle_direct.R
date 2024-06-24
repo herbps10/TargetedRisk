@@ -6,6 +6,7 @@ tmle_direct <- function(task, Qtilde, g = NULL, riesz = NULL) {
       task$outcome,
       task$trt,
       task$trt_levels,
+      task$outcome_type,
       extract_fold(Qtilde$predicted_outcomes, task$cv, fold_index),
       if(is.null(g)) { NULL } else { extract_fold(g$treatment_probs, task$cv, fold_index) },
       if(is.null(riesz)) { NULL } else { extract_fold(riesz$rr, task$cv, fold_index) }
@@ -28,7 +29,7 @@ combine_tmle_direct <- function(results, data, trt_levels, cv) {
 }
 
 #' @importFrom stats coef glm plogis qlogis
-estimate_tmle_direct <- function(data, outcome, trt, trt_levels, Qtilde, g = NULL, riesz = NULL) {
+estimate_tmle_direct <- function(data, outcome, trt, trt_levels, outcome_type, Qtilde, g = NULL, riesz = NULL) {
   Qtilde_fluctuation  <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))
 
   colnames(Qtilde_fluctuation) <- trt_levels
@@ -43,8 +44,14 @@ estimate_tmle_direct <- function(data, outcome, trt, trt_levels, Qtilde, g = NUL
       clever_covariate_valid <- 1 / g$validation[, trt_level]
     }
 
-    fit <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train + offset(qlogis(Qtilde$training[, trt_level])), family = "binomial")
-    Qtilde_fluctuation[, trt_level] <- plogis(qlogis(Qtilde$validation[, trt_level]) + coef(fit) * clever_covariate_valid)
+    if(outcome_type == "binomial") {
+      fit <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train + offset(qlogis(Qtilde$training[, trt_level])), family = "binomial")
+      Qtilde_fluctuation[, trt_level] <- plogis(qlogis(Qtilde$validation[, trt_level]) + coef(fit) * clever_covariate_valid)
+    }
+    else {
+      fit <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train + offset(Qtilde$training[, trt_level]))
+      Qtilde_fluctuation[, trt_level] <- Qtilde$validation[, trt_level] + coef(fit) * clever_covariate_valid
+    }
   }
 
   list(Qtilde_fluctuation = Qtilde_fluctuation)

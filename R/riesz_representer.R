@@ -1,6 +1,7 @@
-riesz_representer <- function(task, learners, full_fits, learner_folds, parameter = "smr", method = "superriesz", torch_params = list()) {
+riesz_representer <- function(task, learners, full_fits, learner_folds, parameter = "smr", method = "superriesz", torch_params = list(), verbose = FALSE) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
+    if(verbose) cat("Fold", fold_index, "\n")
     results[[fold_index]] <- estimate_riesz_representer(
       task$get_fold(fold_index),
       task$baseline,
@@ -11,7 +12,8 @@ riesz_representer <- function(task, learners, full_fits, learner_folds, paramete
       learners,
       full_fits,
       learner_folds,
-      torch_params
+      torch_params,
+      verbose
     )
   }
   combine_riesz_representer(results, task$data, task$trt_levels, task$cv)
@@ -30,7 +32,7 @@ combine_riesz_representer <- function(results, data, trt_levels, cv) {
 }
 
 #' @importFrom SuperRiesz super_riesz
-estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, parameter, learners, full_fits, learner_folds, torch_params) {
+estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, parameter, learners, full_fits, learner_folds, torch_params, verbose) {
   fits <- list()
   rr <- matrix(0, nrow = nrow(data$validation), ncol = length(trt_levels))
   colnames(rr) <- trt_levels
@@ -40,6 +42,7 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, 
   }
   else if(method == "superriesz") {
     for(trt_level in trt_levels) {
+      if(verbose) cat("Treatment:", trt_level, "\n")
       trt_indicator <- as.numeric(data$training[[trt]] == trt_level)
 
       if(parameter == "smr") {
@@ -81,7 +84,7 @@ estimate_riesz_representer <- function(data, baseline, trt, trt_levels, method, 
       else {
         rr[, trt_level] <- predict(fit, data_shifted_valid)
       }
-      if(any(rr[, trt_level] > 100)) browser()
+      #if(any(rr[, trt_level] > 100)) browser()
     }
   }
 
