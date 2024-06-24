@@ -48,6 +48,7 @@ estimate_treatment_probability <- function(data, baseline, trt, trt_levels, lear
     }
 
     treatment_probs[, trt_level] <- predict(fit, data$validation)
+    treatment_probs[treatment_probs[, trt_level] == 0, trt_level] <- min(treatment_probs[treatment_probs[, trt_level] > 0, trt_level])
   }
 
   list(treatment_probs = treatment_probs, fits = fits)

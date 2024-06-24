@@ -133,7 +133,7 @@ theta_indirect_pw <- function(task, ybar, trt_prop, g, riesz) {
   estimates[, 2] <- theta2
   estimates[, 3] <- thetaER
   estimates[, 4] <- thetaSMR
-  
+
   result <- list(
     estimator = "pw",
     estimates = estimates,
