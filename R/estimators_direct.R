@@ -24,7 +24,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial", "continuous"), trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
+direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial", trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -40,13 +40,13 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomial
   if(verbose == TRUE) cat("Starting treatment fitting\n")
   if(is.null(g)) {
     if(trt_method == "default") {
-      g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds)
+      g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
     }
     else if(tolower(trt_method) == "superriesz") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz")
+      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz", verbose = verbose)
     }
     else if(tolower(trt_method) == "torch") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params)
+      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params, verbose = verbose)
     }
   }
   else {

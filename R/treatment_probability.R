@@ -1,6 +1,7 @@
-treatment_probability <- function(task, learners, full_fits, learner_folds) {
+treatment_probability <- function(task, learners, full_fits, learner_folds, verbose = FALSE) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
+    if(verbose == TRUE) cat(paste0("Fold: ", fold_index, "\n"))
     results[[fold_index]] <- estimate_treatment_probability(
       task$get_fold(fold_index),
       task$baseline,
@@ -8,7 +9,8 @@ treatment_probability <- function(task, learners, full_fits, learner_folds) {
       task$trt_levels,
       learners,
       full_fits,
-      learner_folds
+      learner_folds,
+      verbose
     )
   }
   combine_treatment_probabilities(results, task$data, task$trt_levels, task$cv)
@@ -26,11 +28,12 @@ combine_treatment_probabilities <- function(results, data, trt_levels, cv) {
   )
 }
 
-estimate_treatment_probability <- function(data, baseline, trt, trt_levels, learners, full_fits, learner_folds) {
+estimate_treatment_probability <- function(data, baseline, trt, trt_levels, learners, full_fits, learner_folds, verbose = FALSE) {
   fits <- list()
   treatment_probs <- matrix(0, nrow = nrow(data$validation), ncol = length(trt_levels))
   colnames(treatment_probs) <- trt_levels
   for(trt_level in trt_levels) {
+    if(verbose == TRUE) cat(paste0("Treatment: ", trt_level, "\n"))
     data$training$trt_indicator <- as.numeric(data$training[[trt]] == trt_level)
     fit <- superlearner(
       data = data$training[, c(baseline, "trt_indicator")],
