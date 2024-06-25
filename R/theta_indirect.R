@@ -39,8 +39,8 @@ eif_smr <- function(theta1, theta2, eif1, eif2) {
 
 #' @importFrom stats pnorm qnorm sd
 theta_indirect_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
-  theta1 <- colSums(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
-  theta2 <- colSums(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
+  theta1 <- colMeans(matrix(fluctuations$ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator / trt_prop)
+  theta2 <- colMeans(matrix(fluctuations$Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator / trt_prop)
   thetaER  <- theta1 - theta2
   thetaSMR <- theta1 / theta2
 
