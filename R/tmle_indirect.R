@@ -37,7 +37,7 @@ combine_tmle_indirect <- function(results, data, trt_levels, cv) {
 #' @importFrom stats coef glm plogis qlogis
 estimate_tmle <- function(data, outcome, trt, trt_levels, outcome_type, ybar, trt_prop, Qtilde, g = NULL, riesz = NULL) {
   ybar_fluctuation <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))
-  Qtilde_fluctuation  <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))
+  Qtilde_fluctuation <- matrix(nrow = nrow(data$validation), ncol = length(trt_levels))
 
   colnames(ybar_fluctuation) <- trt_levels
   colnames(Qtilde_fluctuation) <- trt_levels
@@ -62,6 +62,9 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, outcome_type, ybar, tr
       clever_covariate_valid2 <- riesz$validation[, trt_level]
     }
     else {
+      #clever_covariate_train2 <- g$training[, trt_level] / trt_prop$training[, trt_level]
+      #clever_covariate_valid2 <- g$validation[, trt_level] / trt_prop$validation[, trt_level]
+
       clever_covariate_train2 <- g$training[, trt_level]
       clever_covariate_valid2 <- g$validation[, trt_level]
     }

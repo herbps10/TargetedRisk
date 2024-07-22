@@ -1,19 +1,24 @@
 outcome_regression <- function(task, learners, include_treatment, full_fits, learner_folds) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
-    results[[fold_index]] <- estimate_outcome_regression(
-      task$get_fold(fold_index),
-      task$trt,
-      task$baseline,
-      task$outcome,
-      task$outcome_type,
-      task$trt_levels,
-      learners,
-      include_treatment,
-      full_fits,
-      learner_folds
-    )
+    results[[fold_index]] <- future::future({
+      estimate_outcome_regression(
+        task$get_fold(fold_index),
+        task$trt,
+        task$baseline,
+        task$outcome,
+        task$outcome_type,
+        task$trt_levels,
+        learners,
+        include_treatment,
+        full_fits,
+        learner_folds
+      )
+    }, packages = c("TargetedRisk", "mlr3extralearners"))
   }
+
+  results <- future::value(results)
+
   combine_outcome_regressions(results, task$data, task$trt_levels, include_treatment, task$cv)
 }
 
@@ -52,6 +57,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
     learners = learners,
     learner_folds = learner_folds
   )
+  print(fit)
 
   if(full_fits) {
     fits[[1]] <- fit
@@ -70,7 +76,9 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
   }
   else {
     predicted_outcomes <- predict(fit, data$validation)
-    predicted_outcomes <- ifelse(predicted_outcomes == 0, 0.0001, ifelse(predicted_outcomes == 1, 0.9999, predicted_outcomes))
+    if(outcome_type == "continuous") {
+      predicted_outcomes <- ifelse(predicted_outcomes == 0, 0.0001, ifelse(predicted_outcomes == 1, 0.9999, predicted_outcomes))
+    }
   }
 
   list(predicted_outcomes = predicted_outcomes, fits = fits)

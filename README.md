@@ -1,13 +1,13 @@
-# `TargetedSMR`
-`TargetedSMR` is an `R` package that provides methods for Targeted estimation of indirectly standardized mortality ratios (SMRs).
+# `TargetedRisk`
+`TargetedRisk` is an `R` package that provides methods for targeted estimation of direct and indirect risk standardization parameters.
 
-The interface of the package is similar to that of the `lmtp` package for longitudinal modified treatment policies.
+The interface of the package is similar to that of the `lmtp` package.
 
 # Installation
 
 To install the development version from Github:
 ```
-remotes::install_github("herbps10/TargetedSMR")
+remotes::install_github("herbps10/TargetedRisk")
 ```
 
 # Usage
@@ -37,6 +37,6 @@ indirect_results <- indirect_tmle(
   trt = "A",
   baseline = c("W1", "W2", "W3", "W4", "W5"),
   learners_trt = c("mean", "glm"),
-  learners_outcome = c("mean", "glm")
+  
 )
 ```

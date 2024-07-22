@@ -9,11 +9,14 @@ indirect_tmle(
   trt,
   outcome,
   baseline,
-  outcome_type = c("binomial", "continuous"),
+  outcome_type = c("binomial"),
   folds = 5,
   trt_method = "default",
   learners_trt = c("mean", "glm"),
   learners_outcome = c("mean", "glm"),
+  Qtilde = NULL,
+  g = NULL,
+  verbose = FALSE,
   control = standardization_control()
 )
 }
@@ -44,6 +47,9 @@ Vector of learners to include in SuperLearner library for estimating treatment a
 
 \item{learners_outcome}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating outcome regression.}
+
+\item{verbose}{\[\code{logical}]\cr
+Whether to print information messages during fitting}
 
 \item{control}{\[\code{standardization_control}\]\cr
 Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.}

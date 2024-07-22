@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(TargetedSMR)
+library(TargetedRisk)
 
-test_check("TargetedSMR")
+test_check("TargetedRisk")
