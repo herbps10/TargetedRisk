@@ -1,3 +1,4 @@
+#' @importFrom future future
 outcome_regression <- function(task, learners, include_treatment, full_fits, learner_folds) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
@@ -35,7 +36,7 @@ combine_outcome_regressions <- function(results, data, trt_levels, include_treat
   )
 }
 
-#' @importFrom stats predict
+#' @importFrom stats predict model.matrix
 estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_type, trt_levels, learners, include_treatment, full_fits, learner_folds) {
   fits <- list()
   predicted_outcomes <- matrix(0, nrow = nrow(data$validation), ncol = 1)

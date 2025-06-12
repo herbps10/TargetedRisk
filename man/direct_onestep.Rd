@@ -16,8 +16,7 @@ direct_onestep(
   Qtilde = NULL,
   g = NULL,
   verbose = FALSE,
-  control = standardization_control(),
-  torch_params = list()
+  control = standardization_control()
 )
 }
 \arguments{
@@ -44,6 +43,12 @@ Vector of learners to include in SuperLearner library for estimating treatment a
 
 \item{learners_outcome}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating outcome regression.}
+
+\item{Qtilde}{\[\code{matrix}\]\cr
+Optional precomputed Qtilde matrix}
+
+\item{g}{\[\code{matrix}\]\cr
+Optional precomputed probability of treatment matrix}
 
 \item{verbose}{\[\code{logical}]\cr
 Whether to print information messages during fitting}

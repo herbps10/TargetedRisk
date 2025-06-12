@@ -16,6 +16,10 @@
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param Qtilde \[\code{matrix}\]\cr
+#' Optional precomputed Qtilde matrix
+#' @param g \[\code{matrix}\]\cr
+#' Optional precomputed probability of treatment matrix
 #' @param verbose \[\code{logical}]\cr
 #' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
@@ -82,6 +86,10 @@ indirect_tmle <- function(data, trt, outcome, baseline, outcome_type = c("binomi
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param Qtilde \[\code{matrix}\]\cr
+#' Optional precomputed Qtilde matrix
+#' @param g \[\code{matrix}\]\cr
+#' Optional precomputed probability of treatment matrix
 #' @param verbose \[\code{logical}]\cr
 #' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr

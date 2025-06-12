@@ -6,7 +6,8 @@
 #' @param seed random seed for generating provider effects
 #' @param effect_seed random seed for generating observations
 #'
-#' @importFrom purrr map_int
+#' @importFrom stats rbinom runif
+#'
 #' @export
 simulate_providers <- function(N = 1e3, providers = 5, covariates = 5, seed = NA, effect_seed = NA) {
   if(!is.na(seed)) set.seed(effect_seed)
@@ -21,7 +22,7 @@ simulate_providers <- function(N = 1e3, providers = 5, covariates = 5, seed = NA
   g <- g / rowSums(g)
   colnames(g) <- paste0("g", 1:providers)
 
-  A <- map_int(1:N, \(i) sample(1:providers, 1, prob = g[i, ]))
+  A <- unlist(lapply(1:N, \(i) sample(1:providers, 1, prob = g[i, ])))
 
   trt_indicator <- matrix(0, ncol = providers, nrow = N)
   for(a in 1:providers) {

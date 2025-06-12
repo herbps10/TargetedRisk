@@ -1,3 +1,4 @@
+#' @importFrom future future
 treatment_probability <- function(task, learners, full_fits, learner_folds, verbose = FALSE) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {

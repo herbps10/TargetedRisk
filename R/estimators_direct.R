@@ -16,6 +16,10 @@
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param Qtilde \[\code{matrix}\]\cr
+#' Optional precomputed Qtilde matrix
+#' @param g \[\code{matrix}\]\cr
+#' Optional precomputed probability of treatment matrix
 #' @param verbose \[\code{logical}]\cr
 #' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
@@ -24,7 +28,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
+direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -79,6 +83,10 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial",
 #' Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.
 #' @param learners_outcome \[\code{character}\]\cr
 #' Vector of learners to include in SuperLearner library for estimating outcome regression.
+#' @param Qtilde \[\code{matrix}\]\cr
+#' Optional precomputed Qtilde matrix
+#' @param g \[\code{matrix}\]\cr
+#' Optional precomputed probability of treatment matrix
 #' @param verbose \[\code{logical}]\cr
 #' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
@@ -87,7 +95,7 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial",
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
+direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(

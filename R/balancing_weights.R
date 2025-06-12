@@ -1,4 +1,5 @@
 #' @importFrom WeightIt weightit
+#' @importFrom stats as.formula
 balancing_weights <- function(task, method = "glm") {
   fits <- list()
 

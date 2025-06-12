@@ -7,9 +7,7 @@
 standardization_control(
   .return_full_fits = FALSE,
   .learners_trt_folds = 5,
-  .learners_outcome_folds = 5,
-  .torch_params = list(hidden = 20, hidden2 = 20, learning_rate = 0.01, epochs = 250,
-    dropout = 0.05, seed = 1)
+  .learners_outcome_folds = 5
 )
 }
 \arguments{
