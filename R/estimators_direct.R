@@ -177,6 +177,8 @@ direct_weightit <- function(data, trt, outcome, baseline, outcome_type = "binomi
   weights <- balancing_weights(task, method)
   theta <- theta_direct_weightit(task, weights)
 
+  theta$weights <- weights
+
   theta
 }
 
