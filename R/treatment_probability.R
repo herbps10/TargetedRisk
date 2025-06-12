@@ -1,18 +1,24 @@
+#' @importFrom future future
 treatment_probability <- function(task, learners, full_fits, learner_folds, verbose = FALSE) {
   results <- list()
   for(fold_index in seq_along(task$cv)) {
     if(verbose == TRUE) cat(paste0("Fold: ", fold_index, "\n"))
-    results[[fold_index]] <- estimate_treatment_probability(
-      task$get_fold(fold_index),
-      task$baseline,
-      task$trt,
-      task$trt_levels,
-      learners,
-      full_fits,
-      learner_folds,
-      verbose
-    )
+    results[[fold_index]] <- future::future({
+      estimate_treatment_probability(
+        task$get_fold(fold_index),
+        task$baseline,
+        task$trt,
+        task$trt_levels,
+        learners,
+        full_fits,
+        learner_folds,
+        verbose
+      )
+    }, packages = c("TargetedRisk", "mlr3extralearners"))
   }
+
+  results <- future::value(results)
+
   combine_treatment_probabilities(results, task$data, task$trt_levels, task$cv)
 }
 
@@ -42,6 +48,7 @@ estimate_treatment_probability <- function(data, baseline, trt, trt_levels, lear
       learners = learners,
       learner_folds = learner_folds
     )
+    print(fit)
 
     if(full_fits) {
       fits[[trt_level]] <- fit

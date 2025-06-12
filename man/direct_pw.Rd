@@ -10,7 +10,6 @@ direct_pw(
   outcome,
   baseline,
   outcome_type = "binomial",
-  trt_method = "default",
   folds = 5,
   learners = c("mean", "glm"),
   control = standardization_control()

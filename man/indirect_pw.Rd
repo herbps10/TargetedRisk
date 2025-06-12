@@ -10,7 +10,6 @@ indirect_pw(
   outcome,
   baseline,
   outcome_type = "binomial",
-  trt_method = "default",
   folds = 5,
   learners = c("mean", "glm"),
   control = standardization_control()
@@ -31,9 +30,6 @@ Vector of column names of baseline variables.}
 
 \item{outcome_type}{\[\code{character}\]\cr
 Outcome variable type: binomial (binary) or continuous.}
-
-\item{trt_method}{\[\code{character}\]\cr
-Method for estimating treatment assignment mechanism. One of "default", "SuperRiesz", or "torch".}
 
 \item{folds}{\[\code{integer(1)}\]\cr
 Number of folds for top level cross-fitting.}
