@@ -10,7 +10,6 @@ direct_tmle(
   outcome,
   baseline,
   outcome_type = "binomial",
-  trt_method = "default",
   folds = 5,
   learners_trt = c("mean", "glm"),
   learners_outcome = c("mean", "glm"),

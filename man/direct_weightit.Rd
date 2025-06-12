@@ -31,6 +31,9 @@ Vector of column names of baseline variables.}
 \item{outcome_type}{\[\code{character}\]\cr
 Outcome variable type: binomial (binary) or continuous.}
 
+\item{method}{\[\code{character}\]\cr
+Method used within WeightIt for weights estimation. See WeightIt documentation for available methods.}
+
 \item{verbose}{\[\code{logical}]\cr
 Whether to print information messages during fitting}
 

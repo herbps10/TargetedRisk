@@ -1,26 +1,21 @@
-eif_direct <- function(a, y, trt_levels, g, riesz, Qtilde, theta) {
+eif_direct <- function(a, y, trt_levels, g, Qtilde, theta) {
   eif <- matrix(nrow = length(a), ncol = length(trt_levels))
   colnames(eif) <- trt_levels
 
   for(trt_level in trt_levels) {
-    if(is.null(g)) {
-      eif[, trt_level] <- (a == trt_level) * riesz$rr[, trt_level] * (y - Qtilde[, trt_level]) + Qtilde[, trt_level] - theta[trt_level]
-    }
-    else {
-      eif[, trt_level] <- (a == trt_level) / g$treatment_probs[, trt_level] * (y - Qtilde[, trt_level]) + Qtilde[, trt_level] - theta[trt_level]
-    }
+    eif[, trt_level] <- (a == trt_level) / g$treatment_probs[, trt_level] * (y - Qtilde[, trt_level]) + Qtilde[, trt_level] - theta[trt_level]
   }
   eif
 }
 
 #' @importFrom stats pnorm qnorm sd
-theta_direct_onestep <- function(task, Qtilde, g, riesz) {
+theta_direct_onestep <- function(task, Qtilde, g) {
   theta <- colMeans(Qtilde)
-  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, riesz, Qtilde, theta)
+  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, Qtilde, theta)
 
   # Apply one-step correction
   theta <- theta + colMeans(theta_eif)
-  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, riesz, Qtilde, theta)
+  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, Qtilde, theta)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
@@ -79,10 +74,10 @@ theta_direct_weightit <- function(task, weights) {
 }
 
 #' @importFrom stats pnorm qnorm sd
-theta_direct_tmle <- function(task, fluctuations, g, riesz) {
+theta_direct_tmle <- function(task, fluctuations, g) {
   theta <- colMeans(fluctuations$Qtilde)
 
-  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, riesz, fluctuations$Qtilde, theta)
+  theta_eif <- eif_direct(task$data[[task$trt]], task$data[[task$outcome]], task$trt_levels, g, fluctuations$Qtilde, theta)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
@@ -135,13 +130,8 @@ theta_direct_sub <- function(task, Qtilde) {
   result
 }
 
-theta_direct_pw <- function(task, g, riesz) {
-  if(is.null(g)) {
-    theta <- colMeans(task$data[[task$outcome]] * task$trt_indicator * riesz$rr)
-  }
-  else {
-    theta <- colMeans(task$data[[task$outcome]] * task$trt_indicator / g$treatment_probs)
-  }
+theta_direct_pw <- function(task, g) {
+  theta <- colMeans(task$data[[task$outcome]] * task$trt_indicator / g$treatment_probs)
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)

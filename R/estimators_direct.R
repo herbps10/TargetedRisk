@@ -24,7 +24,7 @@
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial", trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
+direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -36,18 +36,9 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial",
     folds = folds
   )
 
-  riesz <- NULL
   if(verbose == TRUE) cat("Starting treatment fitting\n")
   if(is.null(g)) {
-    if(trt_method == "default") {
-      g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
-    }
-    else if(tolower(trt_method) == "superriesz") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz", verbose = verbose)
-    }
-    else if(tolower(trt_method) == "torch") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params, verbose = verbose)
-    }
+    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
   }
   else {
     g <- list(treatment_probs = g)
@@ -61,11 +52,10 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial",
     Qtilde <- list(predicted_outcomes = Qtilde)
   }
 
-  fluctuations <- tmle_direct(task, Qtilde, g, riesz)
+  fluctuations <- tmle_direct(task, Qtilde, g)
 
-  theta <- theta_direct_tmle(task, fluctuations, g, riesz)
+  theta <- theta_direct_tmle(task, fluctuations, g)
   theta$g <- g
-  theta$riesz <- riesz
   theta$Qtilde <- Qtilde
 
   theta
@@ -97,7 +87,7 @@ direct_tmle <- function(data, trt, outcome, baseline, outcome_type = "binomial",
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomial", trt_method = "default", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
+direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners_trt = c("mean", "glm"), learners_outcome = c("mean", "glm"), Qtilde = NULL, g = NULL, verbose = FALSE, control = standardization_control(), torch_params = list()) {
   if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
 
   task <- tsmr_Task$new(
@@ -109,18 +99,9 @@ direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomia
     folds = folds
   )
 
-  riesz <- NULL
   if(verbose == TRUE) cat("Starting treatment fitting\n")
   if(is.null(g)) {
-    if(trt_method == "default") {
-      g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
-    }
-    else if(tolower(trt_method) == "superriesz") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz", verbose = verbose)
-    }
-    else if(tolower(trt_method) == "torch") {
-      riesz <- riesz_representer(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params, verbose = verbose)
-    }
+    g <- treatment_probability(task, learners_trt, control$.return_full_fits, control$.learners_trt_folds, verbose)
   }
   else {
     g <- list(treatment_probs = g)
@@ -134,9 +115,8 @@ direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomia
     Qtilde <- list(predicted_outcomes = Qtilde)
   }
 
-  theta <- theta_direct_onestep(task, Qtilde$predicted_outcomes, g, riesz)
+  theta <- theta_direct_onestep(task, Qtilde$predicted_outcomes, g)
   theta$g <- g
-  theta$riesz <- riesz
   theta$Qtilde <- Qtilde
 
   theta
@@ -154,6 +134,8 @@ direct_onestep <- function(data, trt, outcome, baseline, outcome_type = "binomia
 #' Vector of column names of baseline variables.
 #' @param outcome_type \[\code{character}\]\cr
 #' Outcome variable type: binomial (binary) or continuous.
+#' @param method \[\code{character}\]\cr
+#' Method used within WeightIt for weights estimation. See WeightIt documentation for available methods.
 #' @param verbose \[\code{logical}]\cr
 #' Whether to print information messages during fitting
 #' @param control \[\code{standardization_control}\]\cr
@@ -242,7 +224,7 @@ direct_sub <- function(data, trt, outcome, baseline, outcome_type = "binomial", 
 #' @return A list of class \code{smr}
 #'
 #' @export
-direct_pw <- function(data, trt, outcome, baseline, outcome_type = "binomial", trt_method = "default", folds = 5, learners = c("mean", "glm"), control = standardization_control()) {
+direct_pw <- function(data, trt, outcome, baseline, outcome_type = "binomial", folds = 5, learners = c("mean", "glm"), control = standardization_control()) {
   task <- tsmr_Task$new(
     data = data,
     trt = trt,
@@ -252,20 +234,9 @@ direct_pw <- function(data, trt, outcome, baseline, outcome_type = "binomial", t
     folds = folds
   )
 
-  g <- NULL
-  riesz <- NULL
-  if(trt_method == "default") {
-    g <- treatment_probability(task, learners, control$.return_full_fits, control$.learners_trt_folds)
-  }
-  else if(tolower(trt_method) == "superriesz") {
-    riesz <- riesz_representer(task, learners, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "superriesz")
-  }
-  else if(tolower(trt_method) == "torch") {
-    riesz <- riesz_representer(task, learners, control$.return_full_fits, control$.learners_trt_folds, parameter = "direct", method = "torch", torch_params = control$.torch_params)
-  }
+  g <- treatment_probability(task, learners, control$.return_full_fits, control$.learners_trt_folds)
 
-  theta <- theta_direct_pw(task, g, riesz)
+  theta <- theta_direct_pw(task, g)
   theta$g <- g
-  theta$riesz <- riesz
   theta
 }

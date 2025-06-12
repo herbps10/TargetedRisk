@@ -11,7 +11,6 @@ indirect_tmle(
   baseline,
   outcome_type = c("binomial"),
   folds = 5,
-  trt_method = "default",
   learners_trt = c("mean", "glm"),
   learners_outcome = c("mean", "glm"),
   Qtilde = NULL,
@@ -38,9 +37,6 @@ Outcome variable type: binomial (binary) or continuous.}
 
 \item{folds}{\[\code{integer(1)}\]\cr
 Number of folds for top level cross-fitting.}
-
-\item{trt_method}{\[\code{character}\]\cr
-Method for estimating treatment assignment mechanism. One of "default", "SuperRiesz", or "torch".}
 
 \item{learners_trt}{\[\code{character}\]\cr
 Vector of learners to include in SuperLearner library for estimating treatment assignment mechanism.}
