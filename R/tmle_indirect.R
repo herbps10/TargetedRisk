@@ -62,8 +62,8 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, outcome_type, ybar, tr
       clever_covariate_valid2 <- riesz$validation[, trt_level]
     }
     else {
-      clever_covariate_train2 <- g$training[, trt_level]
-      clever_covariate_valid2 <- g$validation[, trt_level]
+      clever_covariate_train2 <- g$training[, trt_level] / trt_prop$training[, trt_level]
+      clever_covariate_valid2 <- g$validation[, trt_level] / trt_prop$validation[, trt_level]
     }
 
     if(outcome_type == "binomial") {

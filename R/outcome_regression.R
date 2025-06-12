@@ -46,7 +46,7 @@ estimate_outcome_regression <- function(data, trt, baseline, outcome, outcome_ty
   }
 
   fit <- superlearner(
-    data = train[, set],
+    data = train[, set, drop = FALSE],
     outcome = outcome,
     outcome_type = outcome_type,
     learners = learners,
