@@ -43,10 +43,33 @@ test_that("direct substitution method works", {
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
 })
 
+test_that("direct one-step method works", {
+  set.seed(1)
+  result <- direct_onestep(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "default", learners_trt = c("mean"), learners_outcome = c("mean"))
+
+  expect_equal(unname(result$estimates[,"direct"]), c(0.641, 0.656, 0.632, 0.638, 0.652), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
+})
+
+test_that("direct entropy balancing method works", {
+  set.seed(1)
+  result <- direct_weightit(data, trt = trt, outcome = outcome, baseline = baseline, method = "ebal")
+
+  expect_equal(unname(result$estimates[,"direct"]), c(0.623, 0.85, 0.57, 0.628, 0.841), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
+})
+
+test_that("direct energy balancing method works", {
+  set.seed(1)
+  result <- direct_weightit(data, trt = trt, outcome = outcome, baseline = baseline, method = "energy")
+
+  expect_equal(unname(result$estimates[,"direct"]), c(0.623, 0.85, 0.57, 0.628, 0.841), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
+})
 
 test_that("direct TMLE method works", {
   set.seed(1)
-  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "default", learners_trt = c("mean"), learners_outcome = c("mean"))
+  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, trt_method = "default", learners_trt = c("mean"), learners_outcome = c("mean"),)
 
   expect_equal(unname(result$estimates[,"direct"]), c(0.641, 0.656, 0.632, 0.638, 0.652), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))

@@ -84,6 +84,60 @@ theta_indirect_tmle <- function(task, trt_prop, fluctuations, g, riesz) {
   result
 }
 
+
+#' @importFrom stats pnorm qnorm sd
+theta_indirect_onestep <- function(task, trt_prop, ybar, Qtilde, g, riesz) {
+  theta1 <- colMeans(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator / trt_prop)
+  theta2 <- colMeans(matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator / trt_prop)
+  thetaER  <- theta1 - theta2
+  thetaSMR <- theta1 / theta2
+
+  Qtilde_mat <- matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE)
+  colnames(Qtilde_mat) <- task$trt_levels
+
+  ybar_mat <- matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE)
+  colnames(ybar_mat) <- task$trt_levels
+
+  theta1_eif <- eif_theta1(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, ybar_mat, task$trt_indicator, theta1)
+  theta2_eif <- eif_theta2(task$data[[task$trt]], task$data[[task$outcome]], trt_prop, g, riesz, Qtilde_mat, task$trt_indicator, theta2)
+  thetaER_eif <- eif_er(theta1, theta2, theta1_eif, theta2_eif)
+  thetaSMR_eif <- eif_smr(theta1, theta2, theta1_eif, theta2_eif)
+
+  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 4)
+  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 2)
+  rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
+  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("theta1", "theta2", "ER", "SMR")
+  colnames(p_values) <- c("ER", "SMR")
+  estimates[, 1] <- theta1
+  estimates[, 2] <- theta2
+  estimates[, 3] <- thetaER
+  estimates[, 4] <- thetaSMR
+
+  se[, 1] <- apply(theta1_eif, 2, sd) / sqrt(task$n)
+  se[, 2] <- apply(theta2_eif, 2, sd) / sqrt(task$n)
+  se[, 3] <- apply(thetaER_eif, 2, sd) / sqrt(task$n)
+  se[, 4] <- apply(thetaSMR_eif, 2, sd) / sqrt(task$n)
+
+  alpha <- 0.95
+  low  <- estimates + qnorm((1 - alpha) / 2) * se
+  high <- estimates + qnorm(1 - (1 - alpha) / 2) * se
+
+  p_values[, 1] <- 2 * pnorm(abs((estimates[, 3]) / se[, 3]), lower.tail = FALSE)
+  p_values[, 2] <- 2 * pnorm(abs((estimates[, 4] - 1) / se[, 4]), lower.tail = FALSE)
+
+  result <- list(
+    estimator = "Onestep",
+    estimates = estimates,
+    se = se,
+    alpha = 0.95,
+    low = low,
+    high = high,
+    p_values = p_values
+  )
+  class(result) <- "smr"
+  result
+}
+
 theta_indirect_sub <- function(task, ybar, trt_prop, Qtilde) {
   theta1 <- colSums(matrix(ybar, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
   theta2 <- colSums(matrix(Qtilde, nrow = nrow(task$trt_indicator), ncol = ncol(task$trt_indicator), byrow = FALSE) * task$trt_indicator) / colSums(task$trt_indicator)
