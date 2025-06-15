@@ -44,7 +44,6 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, outcome_type, ybar, tr
   for(trt_level in trt_levels) {
     # Psi 1
     clever_covariate_train1 <- as.numeric(data$training[[trt]] == trt_level) / trt_prop$training[, trt_level]
-    #clever_covariate_valid1 <- as.numeric(data$validation[[trt]] == trt_level) / trt_prop$validation[, trt_level]
     clever_covariate_valid1 <- 1 / trt_prop$validation[, trt_level]
     if(outcome_type == "binomial") {
       fit1 <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train1 + offset(qlogis(ybar$training[, 1])), family = "binomial")
@@ -56,8 +55,8 @@ estimate_tmle <- function(data, outcome, trt, trt_levels, outcome_type, ybar, tr
     }
 
     # Psi 2
-    clever_covariate_train2 <- g$training[, trt_level]
-    clever_covariate_valid2 <- g$validation[, trt_level]
+    clever_covariate_train2 <- g$training[, trt_level] / trt_prop$training[, trt_level]
+    clever_covariate_valid2 <- g$validation[, trt_level] / trt_prop$validation[, trt_level]
 
     if(outcome_type == "binomial") {
       fit2 <- glm(data$training[[outcome]] ~ -1 + clever_covariate_train2 + offset(qlogis(Qtilde$training)), family = "binomial")

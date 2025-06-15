@@ -42,7 +42,7 @@ estimate_treatment_probability <- function(data, baseline, trt, trt_levels, lear
     if(verbose == TRUE) cat(paste0("Treatment: ", trt_level, "\n"))
     data$training$trt_indicator <- as.numeric(data$training[[trt]] == trt_level)
     fit <- superlearner(
-      data = data$training[, c(baseline, "trt_indicator")],
+      data = data$training[, c(baseline, "trt_indicator"), drop = FALSE],
       outcome = "trt_indicator",
       outcome_type = "binomial",
       learners = learners,
