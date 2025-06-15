@@ -3,15 +3,6 @@ trt <- "A"
 outcome <- "Y"
 baseline <- paste0("W", 1:5)
 
-.torch_params = list(
-  hidden = 20,
-  hidden2 = 20,
-  learning_rate = 1e-2,
-  epochs = 25,
-  dropout = 0.05,
-  seed = 1
-)
-
 test_that("indirect probability weighting method works", {
   set.seed(1)
   result <- indirect_pw(data, trt = trt, outcome = outcome, baseline = baseline, learners = c("mean"))
@@ -41,5 +32,29 @@ test_that("indirect TMLE method works", {
   result <- indirect_tmle(data, trt = trt, outcome = outcome, baseline = baseline, learners_trt = c("mean"), learners_outcome = c("mean"))
 
   expect_equal(unname(result$estimates[,"SMR"]), c(0.946, 1.239, 0.957, 0.977, 1.165), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))
+})
+
+test_that("indirect MatchIt method works", {
+  set.seed(1)
+  result <- indirect_matchit(data, trt = trt, outcome = outcome, baseline = baseline, method = "nearest", distance = "glm")
+
+  expect_equal(unname(result$estimates[,"SMR"]), c(1, 1.4, 0.88, 0.91, 1.24), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))
+})
+
+test_that("indirect entropy balancing method works", {
+  set.seed(1)
+  result <- indirect_weightit(data, trt = trt, outcome = outcome, baseline = baseline, method = "ebal")
+
+  expect_equal(unname(result$estimates[,"SMR"]), c(1, 1.4, 0.88, 0.91, 1.24), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))
+})
+
+test_that("indirect energy balancing method works", {
+  set.seed(1)
+  result <- indirect_weightit(data, trt = trt, outcome = outcome, baseline = baseline, method = "energy")
+
+  expect_equal(unname(result$estimates[,"SMR"]), c(1, 1.4, 0.88, 0.91, 1.24), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "SMR"]), as.character(1:5))
 })

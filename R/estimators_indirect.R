@@ -137,7 +137,100 @@ indirect_onestep <- function(data, trt, outcome, baseline, outcome_type = c("bin
 }
 
 
-#' Substitution Estimator for Indirect Standardizatio
+#' WeightIt Estimator for Indirect Standardization
+#'
+#' @param data \[\code{data.frame}\]\cr
+#' A \code{data.frame} containing all baseline, treatment, and outcome variables.
+#' @param trt \[\code{character}\]\cr
+#' Column name of treatment variable.
+#' @param outcome \[\code{character}\]\cr
+#' Column name of outcome variable.
+#' @param baseline \[\code{character}\]\cr
+#' Vector of column names of baseline variables.
+#' @param outcome_type \[\code{character}\]\cr
+#' Outcome variable type: binomial (binary) or continuous.
+#' @param method \[\code{character}\]\cr
+#' Method used within WeightIt for weights estimation. See WeightIt documentation for available methods.
+#' @param verbose \[\code{logical}]\cr
+#' Whether to print information messages during fitting
+#' @param control \[\code{standardization_control}\]\cr
+#' Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.
+#'
+#' @return A list of class \code{smr}
+#'
+#' @export
+indirect_weightit <- function(data, trt, outcome, baseline, outcome_type = "binomial", method = "glm", verbose = FALSE, control = standardization_control()) {
+  if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
+
+  task <- tsmr_Task$new(
+    data = data,
+    trt = trt,
+    outcome = outcome,
+    baseline = baseline,
+    outcome_type = outcome_type,
+    folds = 1
+  )
+
+  ybar <- mean_outcome(task)
+  trt_prop <- treatment_proportion(task)
+
+  weights <- balancing_weights(task, method, estimand = "ATT")
+  theta <- theta_indirect_matchit(task, ybar, trt_prop, weights)
+
+  theta$weights <- weights
+
+  theta
+}
+
+#' MatchIt Estimator for Indirect Standardization
+#'
+#' @param data \[\code{data.frame}\]\cr
+#' A \code{data.frame} containing all baseline, treatment, and outcome variables.
+#' @param trt \[\code{character}\]\cr
+#' Column name of treatment variable.
+#' @param outcome \[\code{character}\]\cr
+#' Column name of outcome variable.
+#' @param baseline \[\code{character}\]\cr
+#' Vector of column names of baseline variables.
+#' @param outcome_type \[\code{character}\]\cr
+#' Outcome variable type: binomial (binary) or continuous.
+#' @param method \[\code{character}\]\cr
+#' Method used within MatchIt to select matches. See MatchIt documentation for available methods.
+#' @param distance \[\code{character}\]\cr
+#' Distance method used by MatchIt. See MatchIt documentation for available distance methods.
+#' @param verbose \[\code{logical}]\cr
+#' Whether to print information messages during fitting
+#' @param control \[\code{standardization_control}\]\cr
+#' Additional tuning parameters for controlling fitting. Specify using \link{standardization_control}.
+#'
+#' @return A list of class \code{smr}
+#'
+#' @export
+indirect_matchit <- function(data, trt, outcome, baseline, outcome_type = "binomial", method = "nearest", distance = "glm", verbose = FALSE, control = standardization_control()) {
+  if(length(outcome_type) > 1) outcome_type <- outcome_type[1]
+
+  task <- tsmr_Task$new(
+    data = data,
+    trt = trt,
+    outcome = outcome,
+    baseline = baseline,
+    outcome_type = outcome_type,
+    folds = 1
+  )
+
+  ybar <- mean_outcome(task)
+  trt_prop <- treatment_proportion(task)
+
+  matches <- matching(task, method, distance, estimand = "ATT")
+  theta <- theta_indirect_matchit(task, ybar, trt_prop, matches)
+
+  theta$matches <- matches
+
+  theta
+}
+
+
+#' Substitution Estimator for Indirect Standardization
 #'
 #' @param data \[\code{data.frame}\]\cr
 #' A \code{data.frame} containing all baseline, treatment, and outcome variables.

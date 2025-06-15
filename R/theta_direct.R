@@ -45,13 +45,10 @@ theta_direct_onestep <- function(task, Qtilde, g) {
   result
 }
 
+#' @importFrom marginaleffects avg_predictions
 theta_direct_weightit <- function(task, weights) {
-  theta <- numeric(length(task$trt_levels))
-  names(theta) <- task$trt_levels
-  for(trt_level in task$trt_levels) {
-    trt_indicator <- task$trt_indicator[, trt_level]
-    theta[trt_level] <- mean((weights[[trt_level]]$weights * task$data[[task$outcome]])[trt_indicator])
-  }
+  effects <- lapply(weights$outcome_fits, marginaleffects::avg_predictions, variables = "A")
+  theta <- unlist(lapply(effects, \(effect) effect$estimate[2]))
 
   estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
   p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
@@ -59,9 +56,44 @@ theta_direct_weightit <- function(task, weights) {
   colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("direct")
 
   estimates[, 1] <- theta
+  se[, 1] <- unlist(lapply(effects, \(effect) effect$std.error[2]))
+  low[, 1] <- unlist(lapply(effects, \(effect) effect$conf.low[2]))
+  high[, 1] <- unlist(lapply(effects, \(effect) effect$conf.high[2]))
+  p_values[, 1] <- unlist(lapply(effects, \(effect) effect$p.value[2]))
 
   result <- list(
     estimator = "weightit",
+    estimates = estimates,
+    se = se,
+    alpha = 0.95,
+    low = low,
+    high = high,
+    p_values = p_values
+  )
+  class(result) <- "direct"
+  result
+}
+
+#' @importFrom marginaleffects avg_predictions
+theta_direct_matchit <- function(task, matches) {
+  theta <- numeric(length(task$trt_levels))
+  names(theta) <- task$trt_levels
+
+  effects <- lapply(matches$outcome_fits, marginaleffects::avg_predictions, variables = "A")
+
+  estimates <- se <- low <- high <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
+  p_values <- matrix(NA_real_, nrow = length(task$trt_levels), ncol = 1)
+  rownames(estimates) <- rownames(se) <- rownames(low) <- rownames(high) <- rownames(p_values) <- task$trt_levels
+  colnames(estimates) <- colnames(se) <- colnames(low) <- colnames(high) <- c("direct")
+
+  estimates[, 1] <- unlist(lapply(effects, \(effect) effect$estimate[2]))
+  se[, 1]        <- unlist(lapply(effects, \(effect) effect$std.error[2]))
+  p_values[, 1]  <- unlist(lapply(effects, \(effect) effect$p.value[2]))
+  low[, 1]       <- unlist(lapply(effects, \(effect) effect$conf.low[2]))
+  high[, 1]      <- unlist(lapply(effects, \(effect) effect$conf.high[2]))
+
+  result <- list(
+    estimator = "matchit",
     estimates = estimates,
     se = se,
     alpha = 0.95,

@@ -2,14 +2,6 @@ data <- simulate_providers(N = 5e2, providers = 5, covariates = 5, seed = 1, eff
 trt <- "A"
 outcome <- "Y"
 baseline <- paste0("W", 1:5)
-.torch_params = list(
-  hidden = 20,
-  hidden2 = 20,
-  learning_rate = 1e-2,
-  epochs = 25,
-  dropout = 0.05,
-  seed = 1
-)
 
 test_that("direct probability weighting method works", {
   set.seed(1)
@@ -51,9 +43,17 @@ test_that("direct energy balancing method works", {
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
 })
 
+test_that("direct MatchIt method works", {
+  set.seed(1)
+  result <- direct_matchit(data, trt = trt, outcome = outcome, baseline = baseline, method = "quick", distance = "glm")
+
+  expect_equal(unname(result$estimates[,"direct"]), c(0.623, 0.85, 0.57, 0.628, 0.841), tolerance = 1e-1)
+  expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
+})
+
 test_that("direct TMLE method works", {
   set.seed(1)
-  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, learners_trt = c("mean"), learners_outcome = c("mean"),)
+  result <- direct_tmle(data, trt = trt, outcome = outcome, baseline = baseline, learners_trt = c("mean"), learners_outcome = c("mean"))
 
   expect_equal(unname(result$estimates[,"direct"]), c(0.641, 0.656, 0.632, 0.638, 0.652), tolerance = 1e-1)
   expect_equal(names(result$estimates[, "direct"]), as.character(1:5))
