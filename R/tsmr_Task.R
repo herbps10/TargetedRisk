@@ -23,7 +23,7 @@ tsmr_Task <- R6::R6Class(
       self$baseline <- baseline
       self$outcome_type <- outcome_type
       self$folds <- folds
-      self$trt_levels <- sort(unique(data[[trt]]))
+      self$trt_levels <- as.character(sort(unique(data[[trt]])))
       self$trt_prop <- table(data[[trt]])[self$trt_levels] / self$n
 
       self$trt_indicator <- matrix(nrow = nrow(data), ncol = length(self$trt_levels))
